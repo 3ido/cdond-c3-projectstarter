@@ -83,7 +83,7 @@ workflows:
       - build-frontend
       - build-backend
       - test-frontend:
-          requires: [build-frontend]
+          requires: [build-fro]
       - test-backend:
           requires: [build-backend]
       - scan-frontend:
