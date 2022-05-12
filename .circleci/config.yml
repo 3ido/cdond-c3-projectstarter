@@ -147,12 +147,32 @@ jobs:
               --output text >> .circleci/ansible/inventory.txt
             
       - persist_to_workspace:
-          root: ~/
+          root: ~/cdond-c3-projectstarter/
           paths:
-            - cdond-c3-projectstarter/.circleci/ansible/inventory.txt
-      - return 1
+            - .circleci/ansible/inventory.txt
       
       - destroy-environment
+  
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"] 
+      - attach_workspace:
+          at: .circleci/ansible/inventory.txt
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible 
+            
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+
   
 workflows:
   default:
@@ -169,3 +189,5 @@ workflows:
           requires: [build-backend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
