@@ -152,7 +152,7 @@ jobs:
             - .circleci/ansible/inventory.txt
       
       - destroy-environment
-  
+  ###
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
