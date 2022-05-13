@@ -169,7 +169,7 @@ jobs:
           command: |
             sudo apt update
             sudo apt install software-properties-common -y
-            sudo add -apt-repository --yes --update ppa:ansible/ansible
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
       - add_ssh_keys:
           fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"] 
