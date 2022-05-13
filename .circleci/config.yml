@@ -17,7 +17,6 @@ commands:
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
-
 jobs: 
 
   build-frontend:
@@ -144,7 +143,7 @@ jobs:
               \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:Project,Values=udacity" \
-              --output text >> .circleci/ansible/inventory.txt)
+              --output text >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
             
       - persist_to_workspace:
@@ -156,9 +155,22 @@ jobs:
       
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:2022.04
     steps:
       - checkout
+      - run:
+          name: install awscli
+          command: |
+            curl "https://awscli.amazon.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run: 
+          name: install ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add -apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
       - add_ssh_keys:
           fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"] 
       - attach_workspace:
@@ -172,7 +184,9 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
+            cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
 
   
 workflows:
