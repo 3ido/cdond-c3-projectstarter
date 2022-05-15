@@ -22,7 +22,7 @@ commands:
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
 
-  install-tar+gzip:
+  install-tar-gzip:
     description: install tar and gzip
     steps: 
       - run:
