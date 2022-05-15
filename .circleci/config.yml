@@ -8,7 +8,7 @@ commands:
       - run:
           name: install awscli
           command: |
-            curl "https://awscli.amazon.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
   install-ansible:
@@ -182,6 +182,7 @@ jobs:
       - image: cimg/base:2022.04
     steps:
       - checkout
+      - install-awscli
       - install-ansible
       - add_ssh_keys:
           fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"] 
