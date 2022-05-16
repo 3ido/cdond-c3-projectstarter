@@ -28,7 +28,14 @@ commands:
       - run:
           name: install tar and gzip
           command: |
-              yum -y install tar gzip
+          tar -xzf archive-name.tar.gz
+          cd archive-name
+          ./configure
+          make
+          sudo make install
+        # yum -y install tar gzip
+
+
 
   destroy-environment:
     parameters:
@@ -223,8 +230,8 @@ jobs:
       - image: cimg/base:2022.04
     steps:
       - checkout
-      - install-awscli
       - install-tar-gzip
+      - install-awscli
       - install-ansible
       - attach_workspace:
           at: .circleci/ansible/
