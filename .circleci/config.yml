@@ -28,11 +28,11 @@ commands:
       - run:
           name: install tar and gzip
           command: |
-          tar -xzf archive-name.tar.gz
-          cd archive-name
-          ./configure
-          make
-          sudo make install
+            tar -xzf archive-name.tar.gz
+            cd archive-name
+            ./configure
+            make
+            sudo make install
         # yum -y install tar gzip
 
 
