@@ -223,10 +223,6 @@ jobs:
       - image: cimg/base:2022.04
     steps:
       - checkout
-      - run:
-          name: npm install
-          command: |
-           sudo apt-get install nodejs
       - install-tar-gzip
       - install-awscli
       - install-ansible
