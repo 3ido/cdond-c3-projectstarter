@@ -226,7 +226,7 @@ jobs:
       - run:
           name: npm install
           command: |
-            npm install
+            apt-get install nodejs
       - install-tar-gzip
       - install-awscli
       - install-ansible
