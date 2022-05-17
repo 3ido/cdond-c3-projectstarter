@@ -38,6 +38,27 @@ commands:
             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
             aws cloudformation delete-stack \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+  
+  revert-migration:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+       workflow_id:
+        type: string  
+        default: ${CIRCLE_WORKFLOW_ID:0:7}   
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            SUCCESS=$(curl https://kvdb.io/Mm3sApTXqEkU4hJhN5N1WN/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            SUCCESS = 1
+            if(( $SUCCESS==1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migration:revert
+            fi
+
 jobs: 
 
   build-frontend:
@@ -135,7 +156,7 @@ jobs:
     steps:
       - checkout
       - run: 
-          name: ins tall tar and gzip
+          name: install tar and gzip
           command: |
             yum -y install tar gzip
       - run:
@@ -191,6 +212,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
+
   run-migrations:
     docker:
       - image: circleci/node:latest       
@@ -213,14 +235,17 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:latest 
     steps:
       - checkout
+      - install-awscli
+      - restore_cache:
+          keys: [frontend-deploy]
       - run:
-          name: install nodejs & npm
+          name: install dependencies
           command: |
-            sudo apt install nodejs
-            sudo apt install npm
+            cd frontend 
+            npm install
       - run:
           name: Get backend url
           command: |
@@ -241,27 +266,27 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      
+      - destroy-environment
+      - revert-migration
 
 workflows:
   default:
     jobs:
-      #- build-frontend
-      #- build-backend
-      #- test-frontend:
-      #    requires: [build-frontend]
-      #- test-backend:
-      #    requires: [build-backend]
-      #- scan-frontend:
-      #    requires: [build-frontend]
-      #- scan-backend:
-      #    requires: [build-backend]
-      - deploy-infrastructure
-          #requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - scan-backend:
+          requires: [build-backend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      #- deploy-frontend:
-         # requires:  [deploy-infrastructure]
-      #    requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
