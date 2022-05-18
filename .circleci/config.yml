@@ -100,7 +100,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [frontend-test]
+          keys: [frontend-build]
       - run:
           name: Front-end test
           command: |
@@ -114,7 +114,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-test]
+          keys: [backend-build]
       - run:
           name: Back-end test
           command: |
@@ -128,7 +128,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [scan-frontend]
+          keys: [frontend-build]
       - run:
           name: Front-end scan
           command: |
@@ -142,7 +142,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [scan-backend]
+          keys: [backend-build]
       - run:
           name: Back-end scan
           command: |
@@ -244,11 +244,7 @@ jobs:
       - run:
           name: install tar and gzip
           command: |
-            tar -xzf archive-name.tar.gz
-            cd archive-name
-            ./configure
-            make
-            sudo make install
+            apt-get install tar gzip
       - run:
           name: install dependencies
           command: |
