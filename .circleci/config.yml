@@ -21,7 +21,27 @@ commands:
             sudo apt install software-properties-common -y
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
-
+  
+  revert-migration:
+    description: "Revert the last migration if successfully run in the current workflow"
+    parameters:
+       workflow_id:
+        type: string  
+        default: ${CIRCLE_WORKFLOW_ID:0:7}   
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            SUCCESS=$(curl --insecure https://kvdb.io/KXjwV2Ssg3uAC4XAsTZsap/migration_<< parameters.workflow_id >>)
+            SUCCESS = 1
+            if(( $SUCCESS == 1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migration:revert
+            fi
+  
   destroy-environment:
     parameters:
       workflow_id:
@@ -39,25 +59,6 @@ commands:
             aws cloudformation delete-stack \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
   
-  revert-migration:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-       workflow_id:
-        type: string  
-        default: ${CIRCLE_WORKFLOW_ID:0:7}   
-    steps:
-      - run:
-          name: Revert migrations
-          when: on_fail
-          command: |
-            SUCCESS=$(curl https://kvdb.io/KXjwV2Ssg3uAC4XAsTZsap/migration_<< parameters.workflow_id >>)
-            SUCCESS = 1
-            if(( $SUCCESS == 1 )); 
-            then
-              cd ~/project/backend
-              npm install
-              npm run migration:revert
-            fi
 
 jobs: 
 
@@ -267,6 +268,37 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
+      #- revert-migration
+
+  deploy-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - install-awscli
+      - install-ansible
+      - add_ssh_keys:
+          fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"]
+      - attach_workspace:
+          at: .circleci/ansible/
+      - run:
+          name: Install dependencies
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - destroy-environment
       - revert-migration
 
 workflows:
@@ -289,4 +321,6 @@ workflows:
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
           requires: [run-migrations]
