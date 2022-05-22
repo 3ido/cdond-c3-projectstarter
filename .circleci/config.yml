@@ -284,10 +284,10 @@ jobs:
             RUN apk add --no-cache \
               python3 \
               py3-pip \
-          && pip3 install --upgrade pip \
-          && pip3 install \
+            && pip3 install --upgrade pip \
+            && pip3 install \
               awscli \
-          && rm -rf /var/cache/apk/*
+            && rm -rf /var/cache/apk/*
             RUN aws --version   
             apk add --update ansible
             apk add --update nodejs npm
