@@ -267,19 +267,24 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
-      #- revert-migration
+      - revert-migration
 
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - install-awscli
-      - install-ansible
       - add_ssh_keys:
           fingerprints: ["67:a6:79:3d:1f:0d:14:70:06:13:83:4b:ad:9e:a9:08"]
       - attach_workspace:
           at: .circleci/ansible/
+      - install-awscli
+      - run: 
+          name: install ansible / nodejs
+          command: 
+            apk add --update ansible
+            apk add --update nodejs npm
+
       - run:
           name: Install dependencies
           command: |
