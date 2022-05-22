@@ -271,7 +271,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:2022.04
     steps:
       - checkout
       - add_ssh_keys:
@@ -280,18 +280,14 @@ jobs:
           at: .circleci/ansible/
       - restore_cache:
           keys: [backend-build]
-      - run: 
-          name: install awscli / ansible / nodejs
+      - install-awscli
+      - install-ansible
+      - run:
+          name: Install nodejs
           command: |
-            apk add --no-cache python3 py3-pip \
-              && pip3 install --upgrade pip \
-              && pip3 install awscli \
-              && rm -rf /var/cache/apk/*
-            aws --version  
-            apk add --update curl && \
-            rm -rf /var/cache/apk/* 
-            apk add --update ansible
-            apk add --update nodejs npm
+            curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install nodejs
+
       - run:
           name: Install dependencies
           command: |
@@ -305,9 +301,6 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
-            export TYPEORM_MIGRATIONS_DIR=.migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
