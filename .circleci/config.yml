@@ -287,7 +287,9 @@ jobs:
               && pip3 install --upgrade pip \
               && pip3 install awscli \
               && rm -rf /var/cache/apk/*
-            aws --version   
+            aws --version  
+            apk add --update curl && \
+            rm -rf /var/cache/apk/* 
             apk add --update ansible
             apk add --update nodejs npm
       - run:
@@ -303,6 +305,9 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
+            export TYPEORM_MIGRATIONS_DIR=.migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
