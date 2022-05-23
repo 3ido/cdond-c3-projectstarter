@@ -300,17 +300,14 @@ jobs:
             npm run build
             cd ../
             tar -C backend -czvf artifact.tar.gz .
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/tasks/files
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: deploy backend
           command: |
-            export TYPEORM_MIGRATIONS_DIR=.migrations
-            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy-environment
-      - revert-migration
+      #- destroy-environment
+      #- revert-migration
 
 workflows:
   default:
