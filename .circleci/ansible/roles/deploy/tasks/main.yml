@@ -7,11 +7,11 @@
 - name: "Unarchive backend file"
   ansible.builtin.shell: tar -xzf artifact.tar.gz
   args:
-    chdir: /home/ubuntu/backend
+    chdir: /home/ubuntu/
 
-- name: "installing node"
+- name: "install node"
   shell: |
-      cd /home/ubuntu/backend
+      cd /home/ubuntu/
       npm i
 - name: "excuting with pm"
   shell: |
