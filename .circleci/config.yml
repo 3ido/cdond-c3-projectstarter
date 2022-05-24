@@ -349,9 +349,10 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: amazon/aws-cli
+      - image: cimg/base:2022.04
     steps:
       - checkout
+      - install-awscli
       - attach_workspace:
           at: ~/
       - run:
