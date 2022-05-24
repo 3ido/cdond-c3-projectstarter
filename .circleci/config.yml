@@ -405,6 +405,8 @@ jobs:
             else
               echo "No Stacks to Delete"
             fi
+      - destroy-environment
+      - revert-migration
             
 workflows:
   default:
@@ -435,3 +437,5 @@ workflows:
           requires: [smoke-test]
       - cloudfront-update:
           requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
