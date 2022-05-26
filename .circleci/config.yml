@@ -348,7 +348,7 @@ jobs:
             fi
       - destroy-environment
       - revert-migration
-
+      #######################
   cloudfront-update:
     docker:
       - image: cimg/base:2022.04
@@ -439,4 +439,4 @@ workflows:
       #- cloudfront-update:
       #    requires: [smoke-test]
       #- cleanup:
-      #    requires: [cloudfront-update]
+      ##    requires: [cloudfront-update]
